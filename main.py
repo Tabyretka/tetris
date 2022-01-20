@@ -14,8 +14,14 @@ pygame.display.set_caption('TETRiS')
 game_sc = pygame.Surface(GAME_RES)
 clock = pygame.time.Clock()
 
+row_allowed_sound = pygame.mixer.Sound('files/sounds/row_assembled.mp3')
+row_allowed_sound.set_volume(0.5)
+pygame.mixer.music.load('files/sounds/tetris_theme.mp3')
+bg_music_flag = True
+
 fnt1 = pygame.font.Font('files/font/font.ttf', 65)
 fnt2 = pygame.font.Font('files/font/font.ttf', 25)
+fnt3 = pygame.font.Font(None, 25)
 
 figures_pos = [[(-1, 0), (-2, 0), (0, 0), (1, 0)], [(0, -1), (-1, -1), (-1, 0), (0, 0)],
                [(-1, 0), (-1, 1), (0, 0), (0, -1)], [(0, 0), (-1, 0), (0, 1), (-1, -1)],
@@ -75,6 +81,13 @@ def cheat_record():
         f.write(str(rec))
 
 
+def play_bg_music(state):
+    if state:
+        pygame.mixer.music.play()
+    else:
+        pygame.mixer.music.pause()
+
+
 def start_screen():
     intro_text = ['Правила игры в тетрис:',
                   'Случайные фигурки тетрамино падают сверху в прямоугольный стакан шириной 10 и', 'высотой 20 клеток. '
@@ -94,17 +107,17 @@ def start_screen():
                   'чтобы таким образом получить как можно больше очков.',
                   '',
                   '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
                   'Управление:',
                   '<, A - движение фигуры влево',
                   '>, D - движение фигуры вправо',
                   '↓, S - "сброс" фигуры вниз',
                   'SPASE, W - прокрута фигуры',
-                  '',
-                  '',
-                  '',
-                  '',
-                  '',
-                  '',
                   '',
                   '',
                   '',
@@ -116,7 +129,7 @@ def start_screen():
     screen.blit(fon, (0, 0))
     text_coord = 50
     for line in intro_text:
-        string_rendered = fnt2.render(line, 1, pygame.Color('white'))
+        string_rendered = fnt3.render(line, 1, pygame.Color('white'))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
@@ -139,12 +152,14 @@ def exit_screen():
     screen.fill(pygame.Color('black'))
     text_rect = title_game_over.get_rect(center=(750 / 2, 940 / 2))
     screen.blit(title_game_over, text_rect)
+    play_bg_music(False)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
             elif event.type == pygame.KEYDOWN or \
                     event.type == pygame.MOUSEBUTTONDOWN:
+                play_bg_music(True)
                 return
         pygame.display.flip()
         clock.tick(FPS)
@@ -153,6 +168,9 @@ def exit_screen():
 running = True
 start_screen()
 while running:
+    if bg_music_flag:
+        play_bg_music(True)
+        bg_music_flag = False
     record = record_file()
     dx, rotate = 0, False
     screen.fill(pygame.Color('black'))
@@ -234,6 +252,7 @@ while running:
         else:
             anim_speed += 3
             lines += 1
+            row_allowed_sound.play()
 
     # запоминание очков
     score += scores[lines]
