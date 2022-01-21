@@ -65,7 +65,7 @@ def record_file():
         with open('files/record') as f:
             return f.readline()
     except FileNotFoundError:
-        with open('record', 'w') as f:
+        with open('files/record', 'w') as f:
             f.write('0')
 
 
